@@ -319,7 +319,7 @@
 /* Efecto de selección para items de lista */
 .list-item-selectable {
   @apply transition-all duration-200;
-  @apply border-l-3 border-transparent;
+  border-left: 2px solid transparent;
 }
 
 .list-item-selectable:hover {
@@ -327,7 +327,12 @@
 }
 
 .list-item-selectable.selected {
-  @apply bg-container-inset border-l-primary;
+  @apply bg-container-inset;
+  border-left-color: var(--color-alpha-black-300);
+}
+
+[data-theme="dark"] .list-item-selectable.selected {
+  border-left-color: var(--color-alpha-white-400);
 }
 
 /* Gradientes de fondo decorativos */

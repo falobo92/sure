@@ -40,10 +40,9 @@
                   class: class_names(
                     "group/account block flex items-center gap-3 px-3 py-2.5 rounded-xl",
                     "transition-all duration-200",
-                    "border-l-3 border-transparent",
-                    is_active_page ? "bg-container shadow-border-xs border-l-current" : "hover:bg-surface-hover hover:border-l-current"
+                    is_active_page ? "bg-container shadow-border-xs" : "hover:bg-surface-hover"
                   ),
-                  style: is_active_page ? "border-left-color: #{account_group.color};" : "--tw-border-opacity: 0.5; border-left-color: #{account_group.color};",
+                  style: "border-left: 3px solid #{is_active_page ? account_group.color : 'transparent'};",
                   title: account.name do %>
           
           <%# Logo de la cuenta %>
