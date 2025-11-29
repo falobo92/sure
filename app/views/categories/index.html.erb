@@ -1,46 +1,154 @@
-<header class="flex items-center justify-between">
-  <h1 class="text-primary text-xl font-medium"><%= t(".categories") %></h1>
+<%# Header con diseño mejorado %>
+<header class="mb-8">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="space-y-1">
+      <h1 class="text-2xl lg:text-3xl font-semibold text-primary flex items-center gap-3">
+        <%= icon("shapes", size: "lg", class: "text-secondary") %>
+        <%= t(".categories") %>
+      </h1>
+      <p class="text-sm text-secondary">Organiza tus transacciones con categorías personalizadas</p>
+    </div>
 
-  <div class="flex items-center gap-2">
-    <%= render DS::Menu.new do |menu| %>
-      <% menu.with_item(
-          variant: "button",
-          text: "Delete all",
-          href: destroy_all_categories_path,
-          method: :delete,
-          icon: "trash-2",
-          confirm: CustomConfirm.for_resource_deletion("all categories", high_severity: true)) %>
-    <% end %>
+    <div class="flex items-center gap-3">
+      <%= render DS::Menu.new do |menu| %>
+        <% menu.with_item(
+            variant: "button",
+            text: "Eliminar todas",
+            href: destroy_all_categories_path,
+            method: :delete,
+            icon: "trash-2",
+            destructive: true,
+            confirm: CustomConfirm.for_resource_deletion("all categories", high_severity: true)) %>
+      <% end %>
 
-    <%= render DS::Link.new(
-      text: t(".new"),
-      variant: "primary",
-      icon: "plus",
-      href: new_category_path,
-      frame: :modal
-    ) %>
+      <%= render DS::Link.new(
+        text: t(".new"),
+        variant: "primary",
+        icon: "plus",
+        href: new_category_path,
+        frame: :modal,
+        class: "shadow-sm"
+      ) %>
+    </div>
   </div>
+
+  <%# Estadísticas rápidas %>
+  <% if @categories.any? %>
+    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="bg-container rounded-xl p-4 shadow-border-xs border border-transparent hover:border-tertiary transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-indigo-tint-10 flex items-center justify-center">
+            <%= icon("layers", size: "sm", class: "text-indigo-500") %>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-primary"><%= @categories.count %></p>
+            <p class="text-xs text-secondary">Total</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-container rounded-xl p-4 shadow-border-xs border border-transparent hover:border-tertiary transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-green-tint-10 flex items-center justify-center">
+            <%= icon("trending-up", size: "sm", class: "text-green-500") %>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-primary"><%= @categories.incomes.count %></p>
+            <p class="text-xs text-secondary">Ingresos</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-container rounded-xl p-4 shadow-border-xs border border-transparent hover:border-tertiary transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-red-tint-10 flex items-center justify-center">
+            <%= icon("trending-down", size: "sm", class: "text-red-500") %>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-primary"><%= @categories.expenses.count %></p>
+            <p class="text-xs text-secondary">Gastos</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-container rounded-xl p-4 shadow-border-xs border border-transparent hover:border-tertiary transition-all duration-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-cyan-tint-10 flex items-center justify-center">
+            <%= icon("git-branch", size: "sm", class: "text-cyan-500") %>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-primary"><%= @categories.where.not(parent_id: nil).count %></p>
+            <p class="text-xs text-secondary">Subcategorías</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </header>
 
-<div class="bg-container rounded-xl shadow-border-xs p-4">
+<%# Contenido principal %>
+<div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
   <% if @categories.any? %>
-    <div class="space-y-4">
+    <%# Tabs para ingresos y gastos %>
+    <div class="border-b border-tertiary">
+      <nav class="flex -mb-px">
+        <% if @categories.incomes.any? %>
+          <a href="#incomes" 
+             class="px-6 py-4 text-sm font-medium text-secondary hover:text-primary border-b-2 border-transparent hover:border-primary transition-all duration-200 flex items-center gap-2"
+             data-action="click->categories#showIncomes">
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            <%= t(".categories_incomes") %>
+            <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-green-tint-10 text-green-600"><%= @categories.incomes.count %></span>
+          </a>
+        <% end %>
+        <% if @categories.expenses.any? %>
+          <a href="#expenses" 
+             class="px-6 py-4 text-sm font-medium text-secondary hover:text-primary border-b-2 border-transparent hover:border-primary transition-all duration-200 flex items-center gap-2"
+             data-action="click->categories#showExpenses">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            <%= t(".categories_expenses") %>
+            <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-red-tint-10 text-red-600"><%= @categories.expenses.count %></span>
+          </a>
+        <% end %>
+      </nav>
+    </div>
+
+    <div class="p-4 space-y-6">
       <% if @categories.incomes.any? %>
-        <%= render "categories/category_list_group", title: t(".categories_incomes"), categories: @categories.incomes %>
+        <section id="incomes" class="animate-fade-in">
+          <%= render "categories/category_list_group", title: t(".categories_incomes"), categories: @categories.incomes %>
+        </section>
       <% end %>
 
       <% if @categories.expenses.any? %>
-        <%= render "categories/category_list_group", title: t(".categories_expenses"), categories: @categories.expenses %>
+        <section id="expenses" class="animate-fade-in">
+          <%= render "categories/category_list_group", title: t(".categories_expenses"), categories: @categories.expenses %>
+        </section>
       <% end %>
     </div>
   <% else %>
-    <div class="flex justify-center items-center py-20">
-      <div class="text-center flex flex-col items-center max-w-[500px]">
-        <p class="text-sm text-secondary mb-4"><%= t(".empty") %></p>
-        <div class="flex items-center gap-2">
+    <%# Estado vacío mejorado %>
+    <div class="flex justify-center items-center py-20 px-4">
+      <div class="text-center flex flex-col items-center max-w-md">
+        <%# Ilustración animada %>
+        <div class="relative mb-6">
+          <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center transform rotate-3 transition-transform hover:rotate-6">
+            <%= icon("folder-open", size: "xl", class: "text-indigo-400") %>
+          </div>
+          <div class="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-cyan-100 flex items-center justify-center transform -rotate-6">
+            <%= icon("plus", size: "sm", class: "text-green-500") %>
+          </div>
+        </div>
+        
+        <h3 class="text-lg font-semibold text-primary mb-2">Sin categorías todavía</h3>
+        <p class="text-sm text-secondary mb-6 leading-relaxed"><%= t(".empty") %></p>
+        
+        <div class="flex flex-col sm:flex-row items-center gap-3">
           <%= render DS::Button.new(
             text: t(".bootstrap"),
             href: bootstrap_categories_path,
+            icon: "sparkles",
+            class: "shadow-sm"
           ) %>
 
           <%= render DS::Link.new(

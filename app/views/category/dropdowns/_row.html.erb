@@ -2,9 +2,18 @@
 <% is_selected = category.id === @selected_category&.id %>
 
 <%= content_tag :div,
-      class: ["filterable-item flex justify-between items-center border-none rounded-lg px-2 py-1 group w-full hover:bg-container-inset-hover",
-              { "bg-container-inset": is_selected }],
+      class: [
+        "filterable-item group w-full",
+        "relative flex items-center justify-between gap-3",
+        "px-3 py-2.5 rounded-xl",
+        "border border-transparent",
+        "transition-all duration-200 ease-out",
+        "hover:bg-container-inset-hover hover:border-tertiary hover:shadow-xs",
+        "focus-within:ring-2 focus-within:ring-alpha-black-200 focus-within:ring-offset-1",
+        is_selected ? "bg-container-inset border-secondary shadow-xs" : ""
+      ],
       data: { filter_name: category.name } do %>
+  
   <%= button_to transaction_category_path(
         @transaction.entry,
         entry: {
@@ -13,19 +22,38 @@
         }
       ),
       method: :patch,
-      class: "flex w-full items-center gap-1.5 cursor-pointer focus:outline-none" do %>
+      class: "flex w-full items-center gap-3 cursor-pointer focus:outline-none" do %>
 
-    <%= icon("check") if is_selected %>
+    <%# Indicador de selección con animación %>
+    <div class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+      <% if is_selected %>
+        <div class="w-5 h-5 rounded-full flex items-center justify-center transition-transform duration-200"
+             style="background-color: <%= category.color %>;">
+          <%= icon("check", size: "xs", class: "text-white") %>
+        </div>
+      <% else %>
+        <div class="w-4 h-4 rounded-full border-2 border-secondary opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+      <% end %>
+    </div>
 
+    <%# Indicador de subcategoría %>
     <% if category.subcategory? %>
-      <%= icon("corner-down-right", size: "sm") %>
+      <div class="flex-shrink-0 text-subdued">
+        <%= icon("corner-down-right", size: "sm") %>
+      </div>
     <% end %>
 
-    <%= render partial: "categories/badge", locals: { category: category } %>
+    <%# Badge de categoría mejorado %>
+    <div class="flex-1 min-w-0">
+      <%= render partial: "categories/badge", locals: { category: category } %>
+    </div>
   <% end %>
 
-  <%= render DS::Menu.new do |menu| %>
-    <% menu.with_item(variant: "link", text: t(".edit"), icon: "pencil-line", href: edit_category_path(category), data: { turbo_frame: :modal }) %>
-    <% menu.with_item(variant: "link", text: t(".delete"), icon: "trash-2", href: new_category_deletion_path(category), data: { turbo_frame: :modal }, destructive: true) %>
-  <% end %>
+  <%# Menú de acciones con mejor visibilidad %>
+  <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <%= render DS::Menu.new do |menu| %>
+      <% menu.with_item(variant: "link", text: t(".edit"), icon: "pencil-line", href: edit_category_path(category), data: { turbo_frame: :modal }) %>
+      <% menu.with_item(variant: "link", text: t(".delete"), icon: "trash-2", href: new_category_deletion_path(category), data: { turbo_frame: :modal }, destructive: true) %>
+    <% end %>
+  </div>
 <% end %>

@@ -1,102 +1,147 @@
 <%# locals: (entry:, balance_trend: nil, view_ctx: "global") %>
 
 <% transaction = entry.entryable %>
+<% is_income = entry.amount.negative? %>
+<% is_transfer = transaction.transfer? %>
 
 <%= turbo_frame_tag dom_id(entry) do %>
   <%= turbo_frame_tag dom_id(transaction) do %>
-    <div class="grid grid-cols-12 items-center text-primary text-sm font-medium p-4 lg:p-4 <%= entry.excluded ? "opacity-50 text-gray-400" : "" %>">
+    <div class="group grid grid-cols-12 items-center text-primary text-sm font-medium 
+                p-4 lg:px-5 lg:py-4 
+                rounded-xl mx-1 my-0.5
+                transition-all duration-200 ease-out
+                hover:bg-container-hover
+                border-l-3 border-transparent
+                <%= entry.excluded ? "opacity-50" : "" %>
+                <%= is_income ? "hover:border-green-400" : "hover:border-red-400" %>">
 
-      <div class="pr-4 lg:pr-10 flex items-center gap-3 lg:gap-4 col-span-8">
-        <%= check_box_tag dom_id(entry, "selection"),
-            disabled: transaction.transfer.present?,
-            class: "checkbox checkbox--light",
-            data: {
-              id: entry.id,
-              "bulk-select-target": "row",
-              action: "bulk-select#toggleRowSelection"
-            } %>
+      <%# Columna principal: checkbox + info %>
+      <div class="pr-4 lg:pr-6 flex items-center gap-3 lg:gap-4 col-span-8">
+        <%# Checkbox con estilo mejorado %>
+        <div class="flex-shrink-0">
+          <%= check_box_tag dom_id(entry, "selection"),
+              disabled: transaction.transfer.present?,
+              class: "checkbox checkbox--light",
+              data: {
+                id: entry.id,
+                "bulk-select-target": "row",
+                action: "bulk-select#toggleRowSelection"
+              } %>
+        </div>
 
-        <div class="max-w-full">
-          <%= content_tag :div, class: ["flex items-center gap-2"] do %>
-            <% if transaction.merchant&.logo_url.present? %>
+        <%# Avatar/Logo del comercio %>
+        <div class="flex-shrink-0">
+          <% if transaction.merchant&.logo_url.present? %>
+            <div class="relative">
               <%= image_tag transaction.merchant.logo_url,
-                  class: "w-6 h-6 rounded-full",
+                  class: "w-10 h-10 rounded-xl object-cover shadow-sm border border-tertiary",
                   loading: "lazy" %>
-            <% else %>
+              <% if is_transfer %>
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center">
+                  <%= icon("arrow-right-left", size: "xs", class: "text-blue-500") %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="relative">
               <%= render DS::FilledIcon.new(
                 variant: :text,
                 text: entry.name,
-                size: "sm",
+                size: "md",
                 rounded: true
               ) %>
-            <% end %>
-
-            <div class="truncate">
-              <div class="space-y-0.5">
-                <div class="flex items-center gap-1 min-w-0">
-                  <div class="truncate flex-shrink">
-                    <% if transaction.transfer? %>
-                      <%= link_to(
-                            entry.name,
-                            transaction.transfer.present? ? transfer_path(transaction.transfer) : entry_path(entry),
-                            data: {
-                              turbo_frame: "drawer",
-                              turbo_prefetch: false
-                            },
-                            class: "hover:underline"
-                          ) %>
-                    <% else %>
-                      <%= link_to(
-                            entry.name,
-                            entry_path(entry),
-                            data: {
-                              turbo_frame: "drawer",
-                              turbo_prefetch: false
-                            },
-                            class: "hover:underline"
-                          ) %>
-                    <% end %>
-                  </div>
-
-                  <div class="flex items-center gap-1 flex-shrink-0">
-                    <% if transaction.one_time? %>
-                      <span class="text-orange-500" title="One-time <%= entry.amount.negative? ? "income" : "expense" %> (excluded from averages)">
-                        <%= icon "asterisk", size: "sm", color: "current" %>
-                      </span>
-                    <% end %>
-
-                    <% if transaction.transfer.present? %>
-                      <%= render "transactions/transfer_match", transaction: transaction %>
-                    <% end %>
-                  </div>
+              <% if is_transfer %>
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center">
+                  <%= icon("arrow-right-left", size: "xs", class: "text-blue-500") %>
                 </div>
-
-                <div class="text-secondary text-xs font-normal hidden lg:block">
-                  <% if transaction.transfer? %>
-                    <span class="text-secondary">
-                      <%= transaction.loan_payment? ? "Loan Payment" : "Transfer" %> • <%= entry.account.name %>
-                    </span>
-                  <% else %>
-                    <%= link_to entry.account.name,
-                        account_path(entry.account, tab: "transactions"),
-                        data: { turbo_frame: "_top" },
-                        class: "hover:underline" %>
-                  <% end %>
-                </div>
-              </div>
+              <% end %>
             </div>
           <% end %>
         </div>
+
+        <%# Información de la transacción %>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 min-w-0">
+            <%# Nombre de la transacción %>
+            <div class="truncate flex-1">
+              <% if is_transfer %>
+                <%= link_to(
+                      entry.name,
+                      transaction.transfer.present? ? transfer_path(transaction.transfer) : entry_path(entry),
+                      data: {
+                        turbo_frame: "drawer",
+                        turbo_prefetch: false
+                      },
+                      class: "font-semibold text-primary hover:text-link transition-colors truncate"
+                    ) %>
+              <% else %>
+                <%= link_to(
+                      entry.name,
+                      entry_path(entry),
+                      data: {
+                        turbo_frame: "drawer",
+                        turbo_prefetch: false
+                      },
+                      class: "font-semibold text-primary hover:text-link transition-colors truncate"
+                    ) %>
+              <% end %>
+            </div>
+
+            <%# Badges de estado %>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <% if transaction.one_time? %>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-orange-tint-10 text-orange-600" 
+                      title="<%= is_income ? "Ingreso" : "Gasto" %> único (excluido de promedios)">
+                  <%= icon "asterisk", size: "xs", color: "current" %>
+                </span>
+              <% end %>
+
+              <% if transaction.transfer.present? %>
+                <%= render "transactions/transfer_match", transaction: transaction %>
+              <% end %>
+            </div>
+          </div>
+
+          <%# Metadata secundaria %>
+          <div class="flex items-center gap-2 text-xs text-secondary mt-0.5">
+            <% if is_transfer %>
+              <span class="inline-flex items-center gap-1">
+                <%= icon("arrow-right-left", size: "xs") %>
+                <%= transaction.loan_payment? ? "Pago de préstamo" : "Transferencia" %>
+              </span>
+              <span class="text-subdued">•</span>
+            <% end %>
+            
+            <%= link_to entry.account.name,
+                account_path(entry.account, tab: "transactions"),
+                data: { turbo_frame: "_top" },
+                class: "hover:text-link transition-colors truncate" %>
+          </div>
+        </div>
       </div>
 
+      <%# Columna de categoría %>
       <div class="hidden md:flex items-center gap-1 col-span-2">
         <%= render "transactions/transaction_category", transaction: transaction %>
       </div>
 
-      <div class="col-span-2 col-start-11 md:col-start-auto ml-auto text-right">
-        <%= content_tag :p,
-            transaction.transfer? && view_ctx == "global" ? "+/- #{format_money(entry.amount_money.abs)}" : format_money(-entry.amount_money),
-            class: ["text-green-600": entry.amount.negative?] %>
+      <%# Columna de monto %>
+      <div class="col-span-4 md:col-span-2 col-start-9 md:col-start-auto flex flex-col items-end gap-0.5">
+        <% if is_transfer && view_ctx == "global" %>
+          <span class="inline-flex items-center gap-1 text-secondary">
+            <span class="text-xs">±</span>
+            <span class="font-bold"><%= format_money(entry.amount_money.abs) %></span>
+          </span>
+        <% else %>
+          <span class="font-bold <%= is_income ? "text-green-600" : "text-primary" %>">
+            <%= format_money(-entry.amount_money) %>
+          </span>
+        <% end %>
+        
+        <%# Indicador visual de tipo %>
+        <span class="text-xs <%= is_income ? "text-green-500" : "text-subdued" %>">
+          <%= is_income ? "Ingreso" : "Gasto" %>
+        </span>
       </div>
     </div>
   <% end %>

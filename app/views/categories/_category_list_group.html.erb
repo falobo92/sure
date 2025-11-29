@@ -1,25 +1,43 @@
 <%# locals: (title:, categories:) %>
 
-<div class="rounded-xl bg-container-inset space-y-1 p-1">
-  <div class="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-secondary uppercase">
-    <p><%= title %></p>
-    <span class="text-subdued">&middot;</span>
-    <p><%= categories.count %></p>
+<% 
+  # Determinar el color del grupo basado en el tipo
+  is_income = title.downcase.include?("ingreso") || title.downcase.include?("income")
+  group_color = is_income ? "green" : "red"
+  group_icon = is_income ? "trending-up" : "trending-down"
+%>
+
+<div class="rounded-xl bg-container-inset overflow-hidden">
+  <%# Header del grupo mejorado %>
+  <div class="flex items-center justify-between px-4 py-3 border-b border-tertiary bg-gradient-to-r from-transparent to-<%= group_color %>-tint-5">
+    <div class="flex items-center gap-2">
+      <div class="w-6 h-6 rounded-md bg-<%= group_color %>-tint-10 flex items-center justify-center">
+        <%= icon(group_icon, size: "xs", class: "text-#{group_color}-500") %>
+      </div>
+      <span class="text-sm font-semibold text-primary"><%= title %></span>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-1 text-xs font-medium rounded-full bg-<%= group_color %>-tint-10 text-<%= group_color %>-600">
+        <%= categories.count %> <%= categories.count == 1 ? "categoría" : "categorías" %>
+      </span>
+    </div>
   </div>
 
-  <div class="shadow-border-xs rounded-lg bg-container">
-    <div class="overflow-hidden rounded-lg">
-      <% Category::Group.for(categories).each_with_index do |group, idx| %>
+  <%# Lista de categorías %>
+  <div class="shadow-border-xs rounded-b-lg bg-container divide-y divide-tertiary">
+    <% Category::Group.for(categories).each_with_index do |group, idx| %>
+      <div class="category-group">
         <%= render group.category %>
 
-        <% group.subcategories.each do |subcategory| %>
-          <%= render subcategory %>
+        <% if group.subcategories.any? %>
+          <div class="bg-container-inset/50">
+            <% group.subcategories.each do |subcategory| %>
+              <%= render subcategory %>
+            <% end %>
+          </div>
         <% end %>
-
-        <% unless idx == Category::Group.for(categories).count - 1 %>
-          <%= render "shared/ruler" %>
-        <% end %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
   </div>
 </div>

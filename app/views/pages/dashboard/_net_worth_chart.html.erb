@@ -1,38 +1,67 @@
 <%# locals: (balance_sheet:, period:, **args) %>
 
-<div id="net-worth-chart">
+<div id="net-worth-chart" class="relative">
   <% series = balance_sheet.net_worth_series(period: period) %>
-  <div class="flex justify-between gap-4 px-4">
-    <div class="space-y-2">
+  
+  <%# Header con valor y selector de período %>
+  <div class="flex flex-col sm:flex-row justify-between gap-4 px-4 pb-4">
+    <div class="space-y-1">
+      <p class="text-xs font-semibold text-secondary uppercase tracking-wide flex items-center gap-1.5">
+        <%= icon("trending-up", size: "xs") %>
+        Patrimonio Neto
+      </p>
+      
       <% if series.trend.present? %>
-        <p class="text-primary -space-x-0.5 text-3xl font-medium <%= "animate-pulse" if balance_sheet.syncing? %>">
-          <%= series.trend.current.format %>
-        </p>
-        <%= render partial: "shared/trend_change", locals: { trend: series.trend, comparison_label: period.comparison_label } %>
+        <div class="flex items-baseline gap-3">
+          <p class="text-primary text-3xl lg:text-4xl font-bold <%= "animate-pulse" if balance_sheet.syncing? %>">
+            <%= series.trend.current.format %>
+          </p>
+        </div>
+        
+        <%# Indicador de tendencia mejorado %>
+        <div class="mt-2">
+          <%= render partial: "shared/trend_change", locals: { trend: series.trend, comparison_label: period.comparison_label } %>
+        </div>
       <% else %>
-        <p class="text-sm text-secondary"><%= t(".data_not_available") %></p>
+        <div class="flex items-center gap-2 text-secondary">
+          <%= icon("info", size: "sm") %>
+          <p class="text-sm"><%= t(".data_not_available") %></p>
+        </div>
       <% end %>
     </div>
 
-    <%= form_with url: root_path, method: :get, data: { controller: "auto-submit-form", turbo_frame: "_top" } do |form| %>
-      <%= form.select :period,
-                    Period.as_options,
-                    { selected: period.key },
-                    data: { "auto-submit-form-target": "auto" },
-                    class: "bg-container border border-secondary font-medium rounded-lg px-3 py-2 text-sm pr-7 cursor-pointer text-primary focus:outline-hidden focus:ring-0" %>
-    <% end %>
+    <%# Selector de período con mejor diseño %>
+    <div class="flex-shrink-0">
+      <%= form_with url: root_path, method: :get, data: { controller: "auto-submit-form", turbo_frame: "_top" } do |form| %>
+        <div class="relative">
+          <%= form.select :period,
+                        Period.as_options,
+                        { selected: period.key },
+                        data: { "auto-submit-form-target": "auto" },
+                        class: "appearance-none bg-container-inset hover:bg-container-inset-hover border border-secondary font-semibold rounded-xl px-4 py-2.5 pr-10 text-sm cursor-pointer text-primary focus:outline-none focus:ring-2 focus:ring-alpha-black-200 transition-all duration-200" %>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <%= icon("chevron-down", size: "sm", class: "text-secondary") %>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 
+  <%# Gráfico o estado vacío %>
   <% if series.any? %>
     <div
-    id="netWorthChart"
-    class="w-full flex-1 min-h-52"
-    data-controller="time-series-chart"
-    data-time-series-chart-data-value="<%= series.to_json %>"></div>
+      id="netWorthChart"
+      class="w-full flex-1 min-h-56 lg:min-h-64"
+      data-controller="time-series-chart"
+      data-time-series-chart-data-value="<%= series.to_json %>">
+    </div>
   <% else %>
-    <div class="w-full h-full flex items-center justify-center">
-      <p class="text-secondary text-sm"><%= t(".data_not_available") %></p>
+    <div class="w-full h-52 flex flex-col items-center justify-center bg-surface-inset/30 rounded-xl mx-4">
+      <div class="w-12 h-12 rounded-xl bg-container flex items-center justify-center mb-3 shadow-sm">
+        <%= icon("bar-chart-2", size: "md", class: "text-secondary") %>
+      </div>
+      <p class="text-secondary text-sm font-medium"><%= t(".data_not_available") %></p>
+      <p class="text-subdued text-xs mt-1">Agrega cuentas para ver tu evolución</p>
     </div>
   <% end %>
-
 </div>

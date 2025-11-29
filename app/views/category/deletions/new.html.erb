@@ -2,31 +2,92 @@
   <% dialog.with_header(title: t(".delete_category"), subtitle: t(".explanation", category_name: @category.name)) %>
 
   <% dialog.with_body do %>
+    <%# Vista previa de la categoría a eliminar %>
+    <div class="mb-6 p-4 rounded-xl bg-surface-inset border border-tertiary">
+      <div class="flex items-center gap-4">
+        <%# Icono de categoría grande %>
+        <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 hover:scale-105"
+             style="background: linear-gradient(135deg, 
+               color-mix(in oklab, <%= @category.color %> 20%, transparent) 0%,
+               color-mix(in oklab, <%= @category.color %> 10%, transparent) 100%);
+               box-shadow: 0 4px 12px color-mix(in oklab, <%= @category.color %> 20%, transparent);">
+          <% if @category.lucide_icon.present? %>
+            <span style="color: <%= @category.color %>;">
+              <%= icon @category.lucide_icon, size: "md" %>
+            </span>
+          <% else %>
+            <span class="w-4 h-4 rounded-full" style="background-color: <%= @category.color %>;"></span>
+          <% end %>
+        </div>
+        
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-semibold text-primary truncate"><%= @category.name %></h3>
+          <p class="text-sm text-secondary">
+            <% transaction_count = @category.transactions.count %>
+            <% if transaction_count > 0 %>
+              <%= icon("receipt", size: "xs", class: "inline-block mr-1") %>
+              <%= pluralize(transaction_count, "transacción", "transacciones") %> asociadas
+            <% else %>
+              Sin transacciones asociadas
+            <% end %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <%# Advertencia visual %>
+    <div class="mb-6 p-3 rounded-lg bg-red-tint-5 border border-red-200 flex items-start gap-3">
+      <div class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+        <%= icon("alert-triangle", size: "sm", class: "text-red-500") %>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-red-700">Esta acción no se puede deshacer</p>
+        <p class="text-xs text-red-600 mt-0.5">La categoría será eliminada permanentemente del sistema.</p>
+      </div>
+    </div>
+
     <%= styled_form_with url: category_deletions_path(@category),
                        data: {
                          turbo: false,
                          controller: "deletion",
                          deletion_submit_text_when_not_replacing_value: t(".delete_and_leave_uncategorized", category_name: @category.name),
                          deletion_submit_text_when_replacing_value: t(".delete_and_recategorize", category_name: @category.name) } do |f| %>
-      <%= f.collection_select :replacement_category_id,
-                            Current.family.categories.alphabetically.without(@category),
-                            :id, :name,
-                            { prompt: t(".replacement_category_prompt"), label: t(".category"), container_class: "mb-4" },
-                            data: { deletion_target: "replacementField", action: "deletion#chooseSubmitButton" } %>
+      
+      <%# Selector de categoría de reemplazo con mejor diseño %>
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-primary mb-2">
+          <%= icon("folder-sync", size: "sm", class: "inline-block mr-1.5 text-secondary") %>
+          <%= t(".category") %>
+        </label>
+        <p class="text-xs text-secondary mb-3">Opcionalmente, reasigna las transacciones a otra categoría</p>
+        
+        <%= f.collection_select :replacement_category_id,
+                              Current.family.categories.alphabetically.without(@category),
+                              :id, :name,
+                              { prompt: t(".replacement_category_prompt"), label: false, container_class: "" },
+                              { data: { deletion_target: "replacementField", action: "deletion#chooseSubmitButton" },
+                                class: "w-full" } %>
+      </div>
 
-      <%= render DS::Button.new(
-        variant: "destructive",
-        text: t(".delete_and_leave_uncategorized", category_name: @category.name),
-        full_width: true,
-        data: { deletion_target: "destructiveSubmitButton" }
-      ) %>
+      <%# Botones de acción mejorados %>
+      <div class="flex flex-col gap-3">
+        <%= render DS::Button.new(
+          variant: "destructive",
+          text: t(".delete_and_leave_uncategorized", category_name: @category.name),
+          full_width: true,
+          icon: "trash-2",
+          data: { deletion_target: "destructiveSubmitButton" }
+        ) %>
 
-      <%= render DS::Button.new(
-        text: "Delete and reassign",
-        data: { deletion_target: "safeSubmitButton" },
-        hidden: true,
-        full_width: true
-      ) %>
+        <%= render DS::Button.new(
+          text: "Eliminar y reasignar transacciones",
+          variant: "primary",
+          icon: "folder-sync",
+          data: { deletion_target: "safeSubmitButton" },
+          hidden: true,
+          full_width: true
+        ) %>
+      </div>
     <% end %>
   <% end %>
 <% end %>

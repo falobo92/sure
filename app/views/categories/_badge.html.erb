@@ -1,15 +1,43 @@
-<%# locals: (category:) %>
+<%# locals: (category:, size: :md) %>
 <% category ||= Category.uncategorized %>
+<% 
+  # Tamaños disponibles
+  size_classes = case size.to_sym
+                 when :sm then "px-2 py-0.5 text-xs gap-1"
+                 when :lg then "px-3 py-1.5 text-base gap-2"
+                 else "px-2.5 py-1 text-sm gap-1.5"
+                 end
+  
+  icon_size = case size.to_sym
+              when :sm then "xs"
+              when :lg then "md"
+              else "sm"
+              end
+%>
 
-<div>
-  <span class="flex items-center gap-1 text-sm font-medium rounded-full px-1.5 py-1 border truncate focus-visible:outline-none focus-visible:ring-0"
+<div class="inline-flex">
+  <span class="inline-flex items-center <%= size_classes %> font-medium rounded-full border truncate
+               transition-all duration-200 ease-out
+               hover:shadow-sm hover:scale-[1.02]
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
         style="
-          background-color: color-mix(in oklab, <%= category.color %> 10%, transparent);
-          border-color: color-mix(in oklab, <%= category.color %> 10%, transparent);
-          color: <%= category.color %>;">
+          background: linear-gradient(135deg, 
+            color-mix(in oklab, <%= category.color %> 12%, transparent) 0%,
+            color-mix(in oklab, <%= category.color %> 8%, transparent) 100%);
+          border-color: color-mix(in oklab, <%= category.color %> 20%, transparent);
+          color: <%= category.color %>;
+          box-shadow: 0 1px 2px color-mix(in oklab, <%= category.color %> 10%, transparent);">
+    
     <% if category.lucide_icon.present? %>
-      <%= icon category.lucide_icon, size: "sm", color: "current" %>
+      <span class="flex-shrink-0 opacity-90">
+        <%= icon category.lucide_icon, size: icon_size, color: "current" %>
+      </span>
+    <% else %>
+      <%# Círculo de color como fallback %>
+      <span class="flex-shrink-0 w-2 h-2 rounded-full"
+            style="background-color: <%= category.color %>;"></span>
     <% end %>
-    <%= category.name %>
+    
+    <span class="truncate font-semibold"><%= category.name %></span>
   </span>
 </div>

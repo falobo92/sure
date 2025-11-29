@@ -1,24 +1,72 @@
 <%# locals: (category:) %>
 
-<div id="<%= dom_id(category) %>" class="flex justify-between items-center px-4 pb-4 <%= "pt-4" unless category.subcategory? %> <%= "pb-4" unless category.subcategories.any? %> bg-container">
-  <div class="flex w-full items-center gap-2.5">
+<div id="<%= dom_id(category) %>" 
+     class="group relative flex justify-between items-center px-4 py-3 bg-container
+            <%= "pl-8" if category.subcategory? %>
+            transition-all duration-200 ease-out
+            hover:bg-container-hover
+            border-l-3 border-transparent hover:border-current"
+     style="--tw-border-opacity: 0.5; border-left-color: <%= category.color %>;">
+  
+  <div class="flex w-full items-center gap-3">
+    <%# Indicador visual de subcategoría %>
     <% if category.subcategory? %>
-      <span style="color: <%= category.color %>">
-        <%= icon "corner-down-right", size: "sm", color: "current", class: "ml-2" %>
-      </span>
+      <div class="flex-shrink-0 opacity-50">
+        <span style="color: <%= category.color %>">
+          <%= icon "corner-down-right", size: "sm", color: "current" %>
+        </span>
+      </div>
     <% end %>
 
-    <%= render partial: "categories/badge", locals: { category: category } %>
+    <%# Avatar/icono de categoría %>
+    <div class="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+         style="background: linear-gradient(135deg, 
+           color-mix(in oklab, <%= category.color %> 15%, transparent) 0%,
+           color-mix(in oklab, <%= category.color %> 8%, transparent) 100%);">
+      <% if category.lucide_icon.present? %>
+        <span style="color: <%= category.color %>;">
+          <%= icon category.lucide_icon, size: "sm" %>
+        </span>
+      <% else %>
+        <span class="w-3 h-3 rounded-full" style="background-color: <%= category.color %>;"></span>
+      <% end %>
+    </div>
+
+    <%# Información de la categoría %>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="font-medium text-primary truncate"><%= category.name %></span>
+        <% if category.subcategories.any? %>
+          <span class="text-xs px-1.5 py-0.5 rounded-full bg-container-inset text-secondary">
+            <%= category.subcategories.count %> sub
+          </span>
+        <% end %>
+      </div>
+      
+      <% transaction_count = category.transactions.count %>
+      <% if transaction_count > 0 %>
+        <p class="text-xs text-secondary mt-0.5">
+          <%= pluralize(transaction_count, "transacción", "transacciones") %>
+        </p>
+      <% end %>
+    </div>
   </div>
 
-  <div class="justify-self-end">
+  <%# Acciones (visible on hover) %>
+  <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <%= render DS::Link.new(
+      variant: "icon",
+      icon: "pencil",
+      href: edit_category_path(category),
+      data: { turbo_frame: :modal },
+      class: "!w-8 !h-8"
+    ) %>
+    
     <%= render DS::Menu.new do |menu| %>
-      <% menu.with_item(variant: "link", text: t(".edit"), icon: "pencil", href: edit_category_path(category), data: { turbo_frame: :modal }) %>
-
       <% if category.transactions.any? %>
         <% menu.with_item(variant: "link", text: t(".delete"), icon: "trash-2", href: new_category_deletion_path(category), destructive: true, data: { turbo_frame: :modal }) %>
       <% else %>
-        <% menu.with_item(variant: "button", text: t(".delete"), icon: "trash-2", href: category_path(category), method: :delete) %>
+        <% menu.with_item(variant: "button", text: t(".delete"), icon: "trash-2", href: category_path(category), method: :delete, destructive: true) %>
       <% end %>
     <% end %>
   </div>

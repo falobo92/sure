@@ -1,92 +1,130 @@
-<div class="space-y-4 pb-20 flex flex-col">
-  <header class="flex justify-between items-center text-primary font-medium">
-    <h1 class="text-xl">Transactions</h1>
-    <div class="flex items-center gap-5">
-      <div class="flex items-center gap-2">
-        <%= render DS::Menu.new do |menu| %>
-          <% menu.with_item(variant: "link", text: "New rule", href: new_rule_path(resource_type: "transaction"), icon: "plus", data: { turbo_frame: :modal }) %>
-          <% menu.with_item(variant: "link", text: "Edit rules", href: rules_path, icon: "git-branch", data: { turbo_frame: :_top }) %>
-          <% menu.with_item(variant: "link", text: "Edit categories", href: categories_path, icon: "shapes", data: { turbo_frame: :_top }) %>
-          <% menu.with_item(variant: "link", text: "Edit tags", href: tags_path, icon: "tags", data: { turbo_frame: :_top }) %>
-          <% menu.with_item(variant: "link", text: "Edit merchants", href: family_merchants_path, icon: "store", data: { turbo_frame: :_top }) %>
-          <% menu.with_item(variant: "link", text: "Edit imports", href: imports_path, icon: "hard-drive-upload", data: { turbo_frame: :_top }) %>
-          <% menu.with_item(variant: "link", text: "Import", href: new_import_path, icon: "download", data: { turbo_frame: "modal", class_name: "md:!hidden" }) %>
-        <% end %>
+<div class="space-y-6 pb-20 flex flex-col">
+  <%# Header mejorado %>
+  <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="space-y-1">
+      <h1 class="text-2xl lg:text-3xl font-bold text-primary flex items-center gap-3">
+        <%= icon("credit-card", size: "lg", class: "text-secondary") %>
+        Transacciones
+      </h1>
+      <p class="text-sm text-secondary">Administra tus ingresos y gastos en un solo lugar</p>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <%# Menú de opciones %>
+      <%= render DS::Menu.new do |menu| %>
+        <% menu.with_item(variant: "link", text: "Nueva regla", href: new_rule_path(resource_type: "transaction"), icon: "plus", data: { turbo_frame: :modal }) %>
+        <% menu.with_item(variant: "link", text: "Editar reglas", href: rules_path, icon: "git-branch", data: { turbo_frame: :_top }) %>
+        <% menu.with_item(variant: "link", text: "Editar categorías", href: categories_path, icon: "shapes", data: { turbo_frame: :_top }) %>
+        <% menu.with_item(variant: "link", text: "Editar etiquetas", href: tags_path, icon: "tags", data: { turbo_frame: :_top }) %>
+        <% menu.with_item(variant: "link", text: "Editar comercios", href: family_merchants_path, icon: "store", data: { turbo_frame: :_top }) %>
+        <% menu.with_item(variant: "link", text: "Editar importaciones", href: imports_path, icon: "hard-drive-upload", data: { turbo_frame: :_top }) %>
+        <% menu.with_item(variant: "link", text: "Importar", href: new_import_path, icon: "download", data: { turbo_frame: "modal", class_name: "md:!hidden" }) %>
+      <% end %>
 
-        <div class="hidden md:flex">
-          <%= render DS::Link.new(
-            text: t(".import"),
-            icon: "download",
-            variant: "outline",
-            href: new_import_path,
-            frame: :modal,
-          ) %>
-        </div>
-
+      <%# Botón de importar (desktop) %>
+      <div class="hidden md:flex">
         <%= render DS::Link.new(
-            text: "New transaction",
-            icon: "plus",
-            variant: "primary",
-            href: new_transaction_path,
-            frame: :modal,
-            class: "hidden md:inline-flex"
-          ) %>
-
-        <%= render DS::Link.new(
-            icon: "plus",
-            variant: "icon-inverse",
-            href: new_transaction_path,
-            frame: :modal,
-            class: "rounded-full md:hidden"
-          ) %>
+          text: t(".import"),
+          icon: "download",
+          variant: "outline",
+          href: new_import_path,
+          frame: :modal,
+        ) %>
       </div>
+
+      <%# Botón de nueva transacción (desktop) %>
+      <%= render DS::Link.new(
+          text: "Nueva transacción",
+          icon: "plus",
+          variant: "primary",
+          href: new_transaction_path,
+          frame: :modal,
+          class: "hidden md:inline-flex shadow-sm"
+        ) %>
+
+      <%# Botón de nueva transacción (mobile) %>
+      <%= render DS::Link.new(
+          icon: "plus",
+          variant: "icon-inverse",
+          href: new_transaction_path,
+          frame: :modal,
+          class: "rounded-full md:hidden shadow-md"
+        ) %>
     </div>
   </header>
 
+  <%# Resumen de totales %>
   <%= render "summary", totals: @search.totals %>
 
+  <%# Contenedor principal de transacciones %>
   <div id="transactions"
        data-controller="bulk-select"
        data-bulk-select-singular-label-value="<%= t(".transaction") %>"
        data-bulk-select-plural-label-value="<%= t(".transactions") %>"
-       class="flex flex-col bg-container rounded-xl shadow-border-xs p-4">
-    <%= render "transactions/searches/search" %>
+       class="flex flex-col bg-container rounded-2xl shadow-border-xs overflow-hidden">
+    
+    <%# Barra de búsqueda %>
+    <div class="p-4 border-b border-tertiary bg-surface-inset/30">
+      <%= render "transactions/searches/search" %>
+    </div>
 
+    <%# Barra de selección %>
     <div id="entry-selection-bar" data-bulk-select-target="selectionBar" class="flex justify-center hidden">
       <%= render "transactions/selection_bar" %>
     </div>
 
     <% if @pagy.count > 0 || (@projected_recurring.any? && @q.blank?) %>
-      <div class="grow overflow-y-auto">
+      <div class="grow">
+        <%# Header de la tabla %>
         <% if @transactions.any? %>
-          <div class="grid-cols-12 bg-container-inset rounded-xl px-5 py-3 text-xs uppercase font-medium text-secondary items-center mb-4 grid">
+          <div class="grid grid-cols-12 bg-container-inset px-5 py-3 text-xs uppercase font-semibold text-secondary items-center tracking-wide border-b border-tertiary">
             <div class="pl-0.5 col-span-8 flex items-center gap-4">
               <%= check_box_tag "selection_entry",
                                 class: "checkbox checkbox--light",
                                 data: { action: "bulk-select#togglePageSelection" } %>
-              <p>transaction</p>
+              <span class="flex items-center gap-1.5">
+                <%= icon("receipt", size: "xs") %>
+                Transacción
+              </span>
             </div>
 
-            <p class="col-span-2 md:block hidden">category</p>
-            <p class="col-span-2 col-start-11 md:col-start-auto justify-self-end md:block">amount</p>
+            <span class="col-span-2 md:flex items-center gap-1.5 hidden">
+              <%= icon("shapes", size: "xs") %>
+              Categoría
+            </span>
+            <span class="col-span-2 col-start-11 md:col-start-auto justify-self-end flex items-center gap-1.5">
+              <%= icon("coins", size: "xs") %>
+              Monto
+            </span>
           </div>
         <% end %>
 
-        <div class="space-y-6">
+        <%# Lista de transacciones %>
+        <div class="divide-y divide-tertiary">
+          <%# Transacciones recurrentes proyectadas %>
           <% if @projected_recurring.any? && @q.blank? %>
-            <div class="space-y-2">
-              <h3 class="text-xs uppercase font-medium text-secondary px-2"><%= t("recurring_transactions.upcoming") %></h3>
-              <% @projected_recurring.group_by(&:next_expected_date).sort.each do |date, transactions| %>
-                <div class="space-y-2">
-                  <div class="text-xs text-secondary px-2 pt-2"><%= l(date, format: :long) %></div>
-                  <% transactions.each do |recurring_transaction| %>
-                    <%= render "recurring_transactions/projected_transaction", recurring_transaction: recurring_transaction %>
-                  <% end %>
-                </div>
-              <% end %>
+            <div class="p-4 bg-blue-tint-5/50">
+              <h3 class="text-xs uppercase font-semibold text-blue-600 px-2 mb-3 flex items-center gap-2">
+                <%= icon("calendar-clock", size: "sm") %>
+                <%= t("recurring_transactions.upcoming") %>
+              </h3>
+              <div class="space-y-1">
+                <% @projected_recurring.group_by(&:next_expected_date).sort.each do |date, transactions| %>
+                  <div class="space-y-1">
+                    <div class="text-xs font-medium text-blue-500 px-3 py-1.5 bg-blue-tint-10 rounded-lg inline-block mb-2">
+                      <%= icon("calendar", size: "xs", class: "inline-block mr-1") %>
+                      <%= l(date, format: :long) %>
+                    </div>
+                    <% transactions.each do |recurring_transaction| %>
+                      <%= render "recurring_transactions/projected_transaction", recurring_transaction: recurring_transaction %>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
             </div>
           <% end %>
 
+          <%# Lista de transacciones agrupadas por fecha %>
           <%= entries_by_date(@transactions.map(&:entry), totals: true) do |entries| %>
             <%= render entries %>
           <% end %>
@@ -96,7 +134,8 @@
       <%= render "entries/empty" %>
     <% end %>
 
-    <div class="pt-4">
+    <%# Paginación %>
+    <div class="p-4 border-t border-tertiary bg-surface-inset/30">
       <%= render "shared/pagination", pagy: @pagy %>
     </div>
   </div>

@@ -188,3 +188,210 @@
   pointer-events: none;
   position: absolute;
 }
+
+/* ========================================
+   ANIMACIONES PERSONALIZADAS
+   ======================================== */
+
+/* Animación de entrada suave */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Animación de shake para errores */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Animación de escala suave */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out forwards;
+}
+
+/* Animación de deslizamiento desde arriba */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out forwards;
+}
+
+/* Animación de rebote suave */
+@keyframes bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-bounce-soft {
+  animation: bounce-soft 2s ease-in-out infinite;
+}
+
+/* Animación de brillo para estados de carga */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Transiciones mejoradas para hover */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* Efecto de resplandor para elementos destacados */
+.glow {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+/* Animación de rotación para iconos de carga */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+/* Estilos para tarjetas interactivas */
+.card-interactive {
+  @apply bg-container rounded-xl shadow-border-xs;
+  @apply border border-transparent;
+  @apply transition-all duration-200 ease-out;
+}
+
+.card-interactive:hover {
+  @apply border-tertiary shadow-border-md;
+  transform: translateY(-1px);
+}
+
+/* Efecto de selección para items de lista */
+.list-item-selectable {
+  @apply transition-all duration-200;
+  @apply border-l-3 border-transparent;
+}
+
+.list-item-selectable:hover {
+  @apply bg-container-hover;
+}
+
+.list-item-selectable.selected {
+  @apply bg-container-inset border-l-primary;
+}
+
+/* Gradientes de fondo decorativos */
+.bg-gradient-subtle {
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.03) 0%,
+    rgba(139, 92, 246, 0.03) 50%,
+    rgba(236, 72, 153, 0.03) 100%
+  );
+}
+
+/* Patrón de puntos para fondos */
+.bg-dots {
+  background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* Border con gradiente */
+.border-gradient {
+  position: relative;
+}
+
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Utilidad para truncar texto con fade */
+.truncate-fade {
+  position: relative;
+  overflow: hidden;
+}
+
+.truncate-fade::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(to right, transparent, var(--color-white));
+}
+
+/* Animación de entrada escalonada para listas */
+.stagger-children > * {
+  animation: fade-in 0.3s ease-out both;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 400ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 450ms; }

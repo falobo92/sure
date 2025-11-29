@@ -1,8 +1,23 @@
 <%# locals: (category:) %>
 
-<span
-      data-category-target="avatar"
-      class="w-14 h-14 flex items-center justify-center rounded-full"
-      style="background-color: color-mix(in oklab, <%= category.color %> 10%, transparent); color: <%= category.color %>">
-  <%= icon(category.lucide_icon, size: "2xl", color: "current") %>
-</span>
+<div class="relative group">
+  <%# Anillo exterior decorativo %>
+  <div class="absolute inset-0 w-16 h-16 rounded-full opacity-30 animate-pulse"
+       style="background: radial-gradient(circle, color-mix(in oklab, <%= category.color %> 30%, transparent) 0%, transparent 70%);
+              transform: scale(1.2);">
+  </div>
+  
+  <%# Avatar principal %>
+  <span data-category-target="avatar"
+        class="relative w-16 h-16 flex items-center justify-center rounded-2xl
+               transition-all duration-300 ease-out
+               group-hover:scale-105 group-hover:shadow-lg"
+        style="background: linear-gradient(145deg, 
+                 color-mix(in oklab, <%= category.color %> 20%, transparent) 0%,
+                 color-mix(in oklab, <%= category.color %> 10%, transparent) 100%);
+               color: <%= category.color %>;
+               box-shadow: 0 4px 20px color-mix(in oklab, <%= category.color %> 25%, transparent),
+                           inset 0 1px 0 color-mix(in oklab, <%= category.color %> 15%, white);">
+    <%= icon(category.lucide_icon, size: "xl", color: "current") %>
+  </span>
+</div>

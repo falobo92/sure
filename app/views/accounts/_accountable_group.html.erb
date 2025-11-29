@@ -1,48 +1,83 @@
 <%# locals: (account_group:, mobile: false, all_tab: false, open: nil, **args) %>
 
-<div id="<%= account_group.dom_id(tab: all_tab ? :all : nil, mobile: mobile) %>">
+<div id="<%= account_group.dom_id(tab: all_tab ? :all : nil, mobile: mobile) %>" 
+     class="mb-2">
   <% is_open = open.nil? ? account_group.accounts.any? { |account| page_active?(account_path(account)) } : open %>
   <%= render DS::Disclosure.new(align: :left, open: is_open) do |disclosure| %>
     <% disclosure.with_summary_content do %>
       <div class="flex items-center gap-3">
-        <%= icon "chevron-right", class: "group-open:transform group-open:rotate-90" %>
-        <%= tag.span class: class_names("text-sm text-primary font-medium", "animate-pulse" => account_group.syncing?) do %>
+        <%= icon "chevron-right", class: "group-open:transform group-open:rotate-90 transition-transform duration-200 text-secondary" %>
+        
+        <%# Icono del tipo de cuenta %>
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-200"
+             style="background-color: color-mix(in oklab, <%= account_group.color %> 15%, transparent);">
+          <%= icon account_group.icon || "wallet", size: "sm", style: "color: #{account_group.color};" %>
+        </div>
+        
+        <%= tag.span class: class_names("text-sm text-primary font-semibold", "animate-pulse" => account_group.syncing?) do %>
           <%= account_group.name %>
         <% end %>
+        
+        <span class="text-xs px-1.5 py-0.5 rounded-full bg-container-inset text-secondary font-medium">
+          <%= account_group.accounts.count %>
+        </span>
       </div>
 
       <div class="ml-auto text-right grow">
-        <%= tag.p format_money(account_group.total_money), class: "text-sm font-medium text-primary" %>
+        <%= tag.p format_money(account_group.total_money), class: "text-sm font-bold text-primary" %>
         <%= turbo_frame_tag "#{account_group.key}_sparkline", src: accountable_sparkline_path(account_group.key), loading: "lazy", data: { controller: "turbo-frame-timeout", turbo_frame_timeout_timeout_value: 10000 } do %>
-          <div class="flex items-center w-8 h-4 ml-auto">
-            <div class="w-6 h-px bg-loader"></div>
+          <div class="flex items-center w-12 h-4 ml-auto">
+            <div class="w-8 h-px bg-loader rounded"></div>
           </div>
         <% end %>
       </div>
     <% end %>
 
-    <div class="space-y-1">
+    <div class="space-y-0.5 mt-1">
       <% account_group.accounts.each do |account| %>
+        <% is_active_page = page_active?(account_path(account)) %>
         <%= link_to account_path(account),
                   class: class_names(
-                    "block flex items-center gap-2 px-3 py-2 rounded-lg",
-                    page_active?(account_path(account)) ? "bg-container" : "hover:bg-surface-hover"
+                    "group/account block flex items-center gap-3 px-3 py-2.5 rounded-xl",
+                    "transition-all duration-200",
+                    "border-l-3 border-transparent",
+                    is_active_page ? "bg-container shadow-border-xs border-l-current" : "hover:bg-surface-hover hover:border-l-current"
                   ),
+                  style: is_active_page ? "border-left-color: #{account_group.color};" : "--tw-border-opacity: 0.5; border-left-color: #{account_group.color};",
                   title: account.name do %>
-          <%= render "accounts/logo", account: account, size: "sm", color: account_group.color %>
-
-          <div class="min-w-0 grow">
-            <div class="flex items-center gap-2 mb-0.5">
-              <%= tag.p account.name, class: class_names("text-sm text-primary font-medium truncate", "animate-pulse" => account.syncing?) %>
-            </div>
-            <%= tag.p account.short_subtype_label, class: "text-sm text-secondary truncate" %>
+          
+          <%# Logo de la cuenta %>
+          <div class="flex-shrink-0 transition-transform duration-200 group-hover/account:scale-105">
+            <%= render "accounts/logo", account: account, size: "sm", color: account_group.color %>
           </div>
 
-          <div class="ml-auto text-right grow h-10">
-            <%= tag.p format_money(account.balance_money), class: "text-sm font-medium text-primary whitespace-nowrap" %>
+          <%# Info de la cuenta %>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <%= tag.p account.name, class: class_names(
+                "text-sm font-medium truncate transition-colors",
+                account.syncing? ? "animate-pulse" : "",
+                is_active_page ? "text-primary" : "text-primary group-hover/account:text-primary"
+              ) %>
+              
+              <% if account.linked? %>
+                <span class="flex-shrink-0 w-4 h-4 rounded-full bg-green-tint-10 flex items-center justify-center" title="Conectada">
+                  <%= icon("link", size: "xs", class: "text-green-500") %>
+                </span>
+              <% end %>
+            </div>
+            <%= tag.p account.short_subtype_label, class: "text-xs text-secondary truncate" %>
+          </div>
+
+          <%# Balance y sparkline %>
+          <div class="ml-auto text-right flex-shrink-0">
+            <%= tag.p format_money(account.balance_money), class: class_names(
+              "text-sm font-bold whitespace-nowrap",
+              account.balance.to_f >= 0 ? "text-primary" : "text-red-500"
+            ) %>
             <%= turbo_frame_tag dom_id(account, :sparkline), src: sparkline_account_path(account), loading: "lazy", data: { controller: "turbo-frame-timeout", turbo_frame_timeout_timeout_value: 10000 } do %>
-              <div class="flex items-center w-8 h-4 ml-auto">
-                <div class="w-6 h-px bg-loader"></div>
+              <div class="flex items-center w-12 h-4 ml-auto justify-end">
+                <div class="w-8 h-px bg-loader rounded"></div>
               </div>
             <% end %>
           </div>
@@ -50,16 +85,18 @@
       <% end %>
     </div>
 
-    <div class="my-2">
+    <%# Botón para agregar nueva cuenta %>
+    <div class="mt-2 pt-2 border-t border-tertiary">
       <%= render DS::Link.new(
-      href: new_polymorphic_path(account_group.key, step: "method_select"),
-      text: t("accounts.sidebar.new_account_group", account_group: account_group.name.downcase.singularize),
-      icon: "plus",
-      full_width: true,
-      variant: "ghost",
-      frame: :modal,
-      class: "justify-start"
-    ) %>
+        href: new_polymorphic_path(account_group.key, step: "method_select"),
+        text: t("accounts.sidebar.new_account_group", account_group: account_group.name.downcase.singularize),
+        icon: "plus",
+        full_width: true,
+        variant: "ghost",
+        frame: :modal,
+        size: :sm,
+        class: "justify-start text-secondary hover:text-primary"
+      ) %>
     </div>
   <% end %>
 </div>
