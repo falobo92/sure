@@ -1,0 +1,41 @@
+<div class="flex items-center justify-between mb-6">
+  <div class="flex items-center gap-2">
+    <% if previous_period_param %>
+      <%= link_to household_dashboard_path(period: previous_period_param), class: "p-2 rounded-lg hover:bg-container-inset transition-colors" do %>
+        <%= icon("chevron-left", class: "w-5 h-5 text-secondary") %>
+      <% end %>
+    <% else %>
+      <span class="p-2 opacity-50">
+        <%= icon("chevron-left", class: "w-5 h-5 text-subdued") %>
+      </span>
+    <% end %>
+
+    <h2 class="text-xl font-semibold text-primary"><%= period_name %></h2>
+
+    <% if next_period_param %>
+      <%= link_to household_dashboard_path(period: next_period_param), class: "p-2 rounded-lg hover:bg-container-inset transition-colors" do %>
+        <%= icon("chevron-right", class: "w-5 h-5 text-secondary") %>
+      <% end %>
+    <% else %>
+      <span class="p-2 opacity-50">
+        <%= icon("chevron-right", class: "w-5 h-5 text-subdued") %>
+      </span>
+    <% end %>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <%= link_to household_line_items_path(period: period_param), class: "text-sm text-secondary hover:text-primary transition-colors" do %>
+      <%= icon("list", class: "w-4 h-4 inline-block mr-1") %>
+      Items Fijos
+    <% end %>
+    <%= link_to household_shared_expenses_path(period: period_param), class: "text-sm text-secondary hover:text-primary transition-colors" do %>
+      <%= icon("split", class: "w-4 h-4 inline-block mr-1") %>
+      Gastos Compartidos
+    <% end %>
+    <%= link_to household_members_path, class: "text-sm text-secondary hover:text-primary transition-colors" do %>
+      <%= icon("users", class: "w-4 h-4 inline-block mr-1") %>
+      Miembros
+    <% end %>
+  </div>
+</div>
+

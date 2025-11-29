@@ -1,0 +1,38 @@
+<%# locals: (item:) %>
+<div class="p-4 flex items-center justify-between hover:bg-container-inset transition-colors">
+  <div class="flex items-center gap-4">
+    <div class="flex flex-col items-center gap-1">
+      <span class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+        <%= item.income? ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+        <%= item.payment_cycle_label %>
+      </span>
+      <span class="text-xs text-secondary"><%= item.item_type_label %></span>
+    </div>
+    <div>
+      <p class="font-medium text-primary"><%= item.description %></p>
+      <p class="text-sm text-secondary">
+        <% if item.member %>
+          <%= item.member.name %> ·
+        <% end %>
+        <%= item.category %>
+      </p>
+    </div>
+  </div>
+  <div class="flex items-center gap-4">
+    <span class="font-medium text-lg <%= item.income? ? 'text-green-600' : 'text-red-600' %>">
+      <%= item.income? ? '+' : '-' %><%= number_to_currency(item.amount_cents, unit: currency_symbol(item.currency), precision: 0) %>
+    </span>
+    <div class="flex items-center gap-1">
+      <%= link_to edit_household_line_item_path(item, period: period_param), class: "p-2 rounded-md hover:bg-surface-inset transition-colors" do %>
+        <%= icon("pencil", class: "w-4 h-4 text-secondary") %>
+      <% end %>
+      <%= button_to household_line_item_path(item, period: period_param),
+        method: :delete,
+        data: { turbo_confirm: "¿Eliminar este item?" },
+        class: "p-2 rounded-md hover:bg-red-50 transition-colors" do %>
+        <%= icon("trash-2", class: "w-4 h-4 text-red-600") %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

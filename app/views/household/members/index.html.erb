@@ -1,0 +1,67 @@
+<% content_for :page_header do %>
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Miembros del Hogar</h1>
+      <p class="text-secondary">Configura los miembros para la liquidación mensual</p>
+    </div>
+    <%= render DS::Link.new(
+      text: "Agregar Miembro",
+      href: new_household_member_path,
+      variant: "primary",
+      icon: "plus"
+    ) %>
+  </div>
+<% end %>
+
+<div class="mb-4">
+  <%= link_to household_dashboard_path, class: "text-sm text-secondary hover:text-primary transition-colors flex items-center gap-1" do %>
+    <%= icon("arrow-left", class: "w-4 h-4") %>
+    Volver al Dashboard
+  <% end %>
+</div>
+
+<% if @members.any? %>
+  <div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
+    <div class="divide-y divide-secondary">
+      <% @members.each do |member| %>
+        <div class="p-4 flex items-center justify-between hover:bg-container-inset transition-colors">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold text-lg theme-dark:bg-indigo-900/30 theme-dark:text-indigo-300">
+              <%= member.code %>
+            </div>
+            <div>
+              <p class="font-medium text-primary"><%= member.name %></p>
+              <p class="text-sm text-secondary">Posición: <%= member.position %></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <%= render DS::Link.new(
+              text: "Editar",
+              href: edit_household_member_path(member),
+              variant: "ghost",
+              size: "sm"
+            ) %>
+            <%= button_to household_member_path(member),
+              method: :delete,
+              data: { turbo_confirm: "¿Estás seguro de eliminar este miembro?" },
+              class: "text-sm text-red-600 hover:text-red-700 px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors" do %>
+              Eliminar
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% else %>
+  <div class="bg-container rounded-xl p-8 text-center shadow-border-xs">
+    <%= icon("users", class: "w-12 h-12 text-secondary mx-auto mb-4") %>
+    <h3 class="text-lg font-semibold text-primary mb-2">Sin miembros</h3>
+    <p class="text-secondary mb-4">Agrega los miembros del hogar para comenzar.</p>
+    <%= render DS::Link.new(
+      text: "Agregar Primer Miembro",
+      href: new_household_member_path,
+      variant: "primary"
+    ) %>
+  </div>
+<% end %>
+

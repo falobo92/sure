@@ -1,0 +1,91 @@
+<%# locals: (line_item:) %>
+<%= form_with model: line_item,
+  url: line_item.persisted? ? household_line_item_path(line_item, period: period_param) : household_line_items_path(period: period_param),
+  class: "space-y-4" do |f| %>
+
+  <% if line_item.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 theme-dark:bg-red-900/20 theme-dark:border-red-800">
+      <p class="font-medium text-red-700 theme-dark:text-red-300">Por favor corrige los siguientes errores:</p>
+      <ul class="list-disc list-inside text-sm text-red-600 theme-dark:text-red-400 mt-2">
+        <% line_item.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="form-field">
+      <%= f.label :kind, "Tipo", class: "form-field__label" %>
+      <%= f.select :kind,
+        [["Ingreso", "income"], ["Gasto", "expense"]],
+        {},
+        class: "form-field__input" %>
+    </div>
+
+    <div class="form-field">
+      <%= f.label :payment_cycle, "Ciclo de Pago", class: "form-field__label" %>
+      <%= f.select :payment_cycle,
+        [["N°1 (Ciclo 1)", "cycle_1"], ["N°2 (Ciclo 2)", "cycle_2"], ["N°3 (Esporádico)", "sporadic"]],
+        {},
+        class: "form-field__input" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="form-field">
+      <%= f.label :category, "Categoría", class: "form-field__label" %>
+      <%= f.text_field :category, class: "form-field__input", placeholder: "Ej: Vivienda, Ingreso, Telefonía", required: true %>
+    </div>
+
+    <div class="form-field">
+      <%= f.label :description, "Descripción", class: "form-field__label" %>
+      <%= f.text_field :description, class: "form-field__input", placeholder: "Ej: Sueldo Felipe, Dividendo", required: true %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="form-field">
+      <%= f.label :item_type, "Variabilidad", class: "form-field__label" %>
+      <%= f.select :item_type,
+        [["CTE (Constante)", "constant"], ["VAR (Variable)", "variable"], ["ESP (Especial)", "special"]],
+        {},
+        class: "form-field__input" %>
+    </div>
+
+    <div class="form-field">
+      <%= f.label :household_member_id, "Miembro (opcional)", class: "form-field__label" %>
+      <%= f.select :household_member_id,
+        @members.map { |m| [m.display_name, m.id] },
+        { include_blank: "Sin asignar" },
+        class: "form-field__input" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="form-field">
+      <%= f.label :amount_cents, "Monto", class: "form-field__label" %>
+      <%= f.number_field :amount_cents, class: "form-field__input", min: 0, step: 1, placeholder: "100000", required: true %>
+      <p class="text-xs text-secondary mt-1">Ingresa el monto en la unidad más pequeña (ej: pesos)</p>
+    </div>
+
+    <div class="form-field">
+      <%= f.label :currency, "Moneda", class: "form-field__label" %>
+      <%= f.select :currency,
+        [["CLP", "CLP"], ["USD", "USD"], ["EUR", "EUR"]],
+        {},
+        class: "form-field__input" %>
+    </div>
+  </div>
+
+  <div class="form-field">
+    <%= f.label :notes, "Notas (opcional)", class: "form-field__label" %>
+    <%= f.text_area :notes, class: "form-field__input", rows: 2, placeholder: "Notas adicionales..." %>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-4">
+    <%= link_to "Cancelar", household_line_items_path(period: period_param), class: "text-sm text-secondary hover:text-primary transition-colors" %>
+    <%= f.submit line_item.persisted? ? "Actualizar" : "Crear Item", class: "px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer" %>
+  </div>
+<% end %>
+

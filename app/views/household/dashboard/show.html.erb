@@ -1,0 +1,259 @@
+<% content_for :page_header do %>
+  <div class="mb-4">
+    <h1 class="text-2xl font-bold text-primary">Finanzas del Hogar</h1>
+    <p class="text-secondary">Resumen mensual y liquidación entre miembros</p>
+  </div>
+<% end %>
+
+<%= render "household/shared/period_nav" %>
+
+<% if @members.empty? %>
+  <div class="bg-container rounded-xl p-8 text-center shadow-border-xs">
+    <%= icon("users", class: "w-12 h-12 text-secondary mx-auto mb-4") %>
+    <h3 class="text-lg font-semibold text-primary mb-2">Sin miembros configurados</h3>
+    <p class="text-secondary mb-4">Para comenzar, agrega los miembros del hogar.</p>
+    <%= render DS::Link.new(
+      text: "Agregar Miembros",
+      href: new_household_member_path,
+      variant: "primary"
+    ) %>
+  </div>
+<% else %>
+  <% summary = @settlement.summary %>
+
+  <%# Summary Cards %>
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <%= render "household/shared/summary_card",
+      title: "Total Ingresos",
+      amount: summary[:totals][:incomes],
+      currency: Current.family.currency,
+      variant: :positive,
+      icon_name: "trending-up" %>
+
+    <%= render "household/shared/summary_card",
+      title: "Gastos Fijos",
+      amount: summary[:totals][:fixed_expenses],
+      currency: Current.family.currency,
+      variant: :negative,
+      icon_name: "receipt" %>
+
+    <%= render "household/shared/summary_card",
+      title: "Gastos Compartidos",
+      amount: summary[:totals][:shared_expenses],
+      currency: Current.family.currency,
+      variant: :negative,
+      icon_name: "split" %>
+
+    <%= render "household/shared/summary_card",
+      title: "Balance Neto",
+      amount: summary[:totals][:net_balance],
+      currency: Current.family.currency,
+      variant: summary[:totals][:net_balance] >= 0 ? :positive : :negative,
+      icon_name: "wallet" %>
+  </div>
+
+  <%# Settlement Section %>
+  <% if @members.length >= 2 %>
+    <div class="bg-container rounded-xl p-6 shadow-border-xs mb-6">
+      <h3 class="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
+        <%= icon("arrow-left-right", class: "w-5 h-5") %>
+        Liquidación del Mes
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <% @members.each_with_index do |member, index| %>
+          <% member_settlement = summary[:member_settlements][member.id] %>
+          <% if member_settlement %>
+            <div class="bg-surface-inset rounded-lg p-4">
+              <div class="flex items-center gap-2 mb-3">
+                <%= icon("user", class: "w-5 h-5 text-secondary") %>
+                <h4 class="font-medium text-primary"><%= member.name %> (<%= member.code %>)</h4>
+                <span class="text-xs px-2 py-1 rounded-full bg-container text-secondary">
+                  Ciclo N°<%= index + 1 %>
+                </span>
+              </div>
+
+              <dl class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <dt class="text-secondary">Ingresos del ciclo:</dt>
+                  <dd class="font-medium text-green-600"><%= number_to_currency(member_settlement[:incomes], unit: currency_symbol(Current.family.currency), precision: 0) %></dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-secondary">Gastos fijos del ciclo:</dt>
+                  <dd class="font-medium text-red-600"><%= number_to_currency(member_settlement[:fixed_expenses], unit: currency_symbol(Current.family.currency), precision: 0) %></dd>
+                </div>
+                <div class="flex justify-between border-t border-secondary pt-2">
+                  <dt class="text-secondary">Balance del ciclo:</dt>
+                  <dd class="font-medium text-primary"><%= number_to_currency(member_settlement[:cycle_balance], unit: currency_symbol(Current.family.currency), precision: 0) %></dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-secondary">Mitad del balance:</dt>
+                  <dd class="font-medium text-primary"><%= number_to_currency(member_settlement[:half_balance], unit: currency_symbol(Current.family.currency), precision: 0) %></dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-secondary">Gastos compartidos pagados:</dt>
+                  <dd class="font-medium text-orange-600"><%= number_to_currency(member_settlement[:shared_expenses_paid], unit: currency_symbol(Current.family.currency), precision: 0) %></dd>
+                </div>
+                <div class="flex justify-between border-t border-secondary pt-2">
+                  <dt class="font-medium text-primary">Libre c/u:</dt>
+                  <dd class="font-bold text-lg <%= member_settlement[:libre] >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                    <%= number_to_currency(member_settlement[:libre], unit: currency_symbol(Current.family.currency), precision: 0) %>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%# Transfer Banner %>
+      <% transfer = summary[:transfers] %>
+      <% if transfer[:amount] && transfer[:amount] > 0 %>
+        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 theme-dark:bg-indigo-900/20 theme-dark:border-indigo-800">
+          <div class="flex items-center justify-center gap-4">
+            <span class="font-medium text-indigo-700 theme-dark:text-indigo-300"><%= transfer[:from_name] %></span>
+            <%= icon("arrow-right", class: "w-6 h-6 text-indigo-500") %>
+            <span class="text-2xl font-bold text-indigo-700 theme-dark:text-indigo-300">
+              <%= number_to_currency(transfer[:amount], unit: currency_symbol(Current.family.currency), precision: 0) %>
+            </span>
+            <%= icon("arrow-right", class: "w-6 h-6 text-indigo-500") %>
+            <span class="font-medium text-indigo-700 theme-dark:text-indigo-300"><%= transfer[:to_name] %></span>
+          </div>
+          <p class="text-center text-sm text-indigo-600 mt-2 theme-dark:text-indigo-400">
+            Transferencia neta para equilibrar el mes
+          </p>
+        </div>
+      <% else %>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center theme-dark:bg-green-900/20 theme-dark:border-green-800">
+          <%= icon("check-circle", class: "w-6 h-6 text-green-600 mx-auto mb-2") %>
+          <p class="font-medium text-green-700 theme-dark:text-green-300">¡Equilibrado! No se requieren transferencias este mes.</p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# Breakdown by Cycle %>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <% [:cycle_1, :cycle_2, :sporadic].each_with_index do |cycle, index| %>
+      <% cycle_data = summary[:by_cycle][cycle] %>
+      <div class="bg-container rounded-xl p-4 shadow-border-xs">
+        <h4 class="font-medium text-primary mb-3 flex items-center gap-2">
+          <%= icon("calendar", class: "w-4 h-4 text-secondary") %>
+          <% if cycle == :sporadic %>
+            N°3 (Esporádicos)
+          <% else %>
+            N°<%= index + 1 %> (<%= @members[index]&.name || "Sin asignar" %>)
+          <% end %>
+        </h4>
+        <dl class="space-y-1 text-sm">
+          <div class="flex justify-between">
+            <dt class="text-secondary">Ingresos:</dt>
+            <dd class="text-green-600"><%= number_to_currency(cycle_data[:incomes], unit: currency_symbol(Current.family.currency), precision: 0) %></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-secondary">Gastos:</dt>
+            <dd class="text-red-600"><%= number_to_currency(cycle_data[:expenses], unit: currency_symbol(Current.family.currency), precision: 0) %></dd>
+          </div>
+          <div class="flex justify-between border-t border-secondary pt-1">
+            <dt class="font-medium text-primary">Balance:</dt>
+            <dd class="font-medium <%= cycle_data[:balance] >= 0 ? 'text-green-600' : 'text-red-600' %>">
+              <%= number_to_currency(cycle_data[:balance], unit: currency_symbol(Current.family.currency), precision: 0) %>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Recent Line Items %>
+  <div class="bg-container rounded-xl p-6 shadow-border-xs mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-primary flex items-center gap-2">
+        <%= icon("list", class: "w-5 h-5") %>
+        Items del Mes
+      </h3>
+      <%= render DS::Link.new(
+        text: "Ver todos",
+        href: household_line_items_path(period: period_param),
+        variant: "ghost"
+      ) %>
+    </div>
+
+    <% if @line_items.any? %>
+      <div class="divide-y divide-secondary">
+        <% @line_items.limit(10).each do |item| %>
+          <div class="py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                <%= item.income? ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+                <%= item.payment_cycle_label %>
+              </span>
+              <div>
+                <p class="font-medium text-primary"><%= item.description %></p>
+                <p class="text-xs text-secondary"><%= item.category %> · <%= item.item_type_label %></p>
+              </div>
+            </div>
+            <span class="font-medium <%= item.income? ? 'text-green-600' : 'text-red-600' %>">
+              <%= item.income? ? '+' : '-' %><%= number_to_currency(item.amount_cents, unit: currency_symbol(item.currency), precision: 0) %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <p class="text-secondary mb-4">No hay items para este período.</p>
+        <%= render DS::Link.new(
+          text: "Agregar Item",
+          href: new_household_line_item_path(period: period_param),
+          variant: "primary"
+        ) %>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Recent Shared Expenses %>
+  <div class="bg-container rounded-xl p-6 shadow-border-xs">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-primary flex items-center gap-2">
+        <%= icon("split", class: "w-5 h-5") %>
+        Gastos Compartidos del Mes
+      </h3>
+      <%= render DS::Link.new(
+        text: "Ver todos",
+        href: household_shared_expenses_path(period: period_param),
+        variant: "ghost"
+      ) %>
+    </div>
+
+    <% if @shared_expenses.any? %>
+      <div class="divide-y divide-secondary">
+        <% @shared_expenses.limit(10).each do |expense| %>
+          <div class="py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center text-xs font-medium">
+                <%= expense.member.code %>
+              </span>
+              <div>
+                <p class="font-medium text-primary"><%= expense.description %></p>
+                <p class="text-xs text-secondary"><%= expense.member_name %> · <%= l(expense.expense_date, format: :short) %></p>
+              </div>
+            </div>
+            <span class="font-medium text-orange-600">
+              <%= number_to_currency(expense.amount_cents, unit: currency_symbol(expense.currency), precision: 0) %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-8">
+        <p class="text-secondary mb-4">No hay gastos compartidos para este período.</p>
+        <%= render DS::Link.new(
+          text: "Agregar Gasto",
+          href: new_household_shared_expense_path(period: period_param),
+          variant: "primary"
+        ) %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+

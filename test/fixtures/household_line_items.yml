@@ -1,0 +1,112 @@
+# Household Line Items fixtures
+# Example data for testing monthly settlement logic
+
+# Cycle 1 (Felipe) - Incomes
+sueldo_felipe:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: felipe
+  category: Ingreso
+  description: Sueldo Felipe
+  payment_cycle: 1
+  item_type: constant
+  kind: income
+  amount_cents: 3000000
+  currency: CLP
+  period_date: <%= Date.current.beginning_of_month %>
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+# Cycle 1 (Felipe) - Expenses
+dividendo:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: felipe
+  category: Vivienda
+  description: Dividendo 409
+  payment_cycle: 1
+  item_type: constant
+  kind: expense
+  amount_cents: 800000
+  currency: CLP
+  period_date: <%= Date.current.beginning_of_month %>
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+credito_felipe:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: felipe
+  category: Crédito de consumo
+  description: Crédito BCH
+  payment_cycle: 1
+  item_type: constant
+  kind: expense
+  amount_cents: 200000
+  currency: CLP
+  period_date: <%= Date.current.beginning_of_month %>
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+# Cycle 2 (Romina) - Incomes
+sueldo_romina:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: romina
+  category: Ingreso
+  description: Sueldo Romina
+  payment_cycle: 2
+  item_type: constant
+  kind: income
+  amount_cents: 2500000
+  currency: CLP
+  period_date: <%= Date.current.beginning_of_month %>
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+# Cycle 2 (Romina) - Expenses
+arriendo:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: romina
+  category: Vivienda
+  description: Arriendo 306
+  payment_cycle: 2
+  item_type: constant
+  kind: expense
+  amount_cents: 600000
+  currency: CLP
+  period_date: <%= Date.current.beginning_of_month %>
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+credito_romina:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: romina
+  category: Crédito de consumo
+  description: Crédito Scotiabank
+  payment_cycle: 2
+  item_type: constant
+  kind: expense
+  amount_cents: 150000
+  currency: CLP
+  period_date: <%= Date.current.beginning_of_month %>
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+# Cycle 3 (Sporadic)
+contribuciones:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  category: Vivienda
+  description: Contribuciones
+  payment_cycle: 3
+  item_type: special
+  kind: expense
+  amount_cents: 100000
+  currency: CLP
+  period_date: <%= Date.current.beginning_of_month %>
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+

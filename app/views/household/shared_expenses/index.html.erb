@@ -1,0 +1,93 @@
+<% content_for :page_header do %>
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h1 class="text-2xl font-bold text-primary">Gastos Compartidos</h1>
+      <p class="text-secondary">Gastos adicionales compartidos - <%= period_name %></p>
+    </div>
+    <%= render DS::Link.new(
+      text: "Agregar Gasto",
+      href: new_household_shared_expense_path(period: period_param),
+      variant: "primary",
+      icon: "plus"
+    ) %>
+  </div>
+<% end %>
+
+<%= render "household/shared/period_nav" %>
+
+<% if @shared_expenses.any? %>
+  <%# Group by member %>
+  <% grouped = @shared_expenses.group_by(&:member) %>
+
+  <% grouped.each do |member, expenses| %>
+    <div class="bg-container rounded-xl shadow-border-xs overflow-hidden mb-6">
+      <div class="px-4 py-3 bg-orange-50 border-b border-orange-200 theme-dark:bg-orange-900/20 theme-dark:border-orange-800">
+        <h3 class="font-semibold text-orange-700 flex items-center gap-2 theme-dark:text-orange-300">
+          <%= icon("user", class: "w-5 h-5") %>
+          <%= member&.name || "Sin asignar" %>
+          <span class="ml-auto text-lg">
+            <%= number_to_currency(expenses.sum(&:amount_cents), unit: currency_symbol(Current.family.currency), precision: 0) %>
+          </span>
+        </h3>
+      </div>
+      <div class="divide-y divide-secondary">
+        <% expenses.each do |expense| %>
+          <div class="p-4 flex items-center justify-between hover:bg-container-inset transition-colors">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center">
+                <%= icon("receipt", class: "w-5 h-5") %>
+              </div>
+              <div>
+                <p class="font-medium text-primary"><%= expense.description %></p>
+                <p class="text-sm text-secondary">
+                  <%= l(expense.expense_date, format: :short) %>
+                  <% unless expense.shared %>
+                    · <span class="text-yellow-600">No compartido</span>
+                  <% end %>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="font-medium text-lg text-orange-600">
+                <%= number_to_currency(expense.amount_cents, unit: currency_symbol(expense.currency), precision: 0) %>
+              </span>
+              <div class="flex items-center gap-1">
+                <%= link_to edit_household_shared_expense_path(expense, period: period_param), class: "p-2 rounded-md hover:bg-surface-inset transition-colors" do %>
+                  <%= icon("pencil", class: "w-4 h-4 text-secondary") %>
+                <% end %>
+                <%= button_to household_shared_expense_path(expense, period: period_param),
+                  method: :delete,
+                  data: { turbo_confirm: "¿Eliminar este gasto?" },
+                  class: "p-2 rounded-md hover:bg-red-50 transition-colors" do %>
+                  <%= icon("trash-2", class: "w-4 h-4 text-red-600") %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <%# Summary %>
+  <div class="bg-container rounded-xl p-4 shadow-border-xs">
+    <div class="flex items-center justify-between">
+      <span class="font-medium text-primary">Total Gastos Compartidos</span>
+      <span class="text-xl font-bold text-orange-600">
+        <%= number_to_currency(@shared_expenses.sum(&:amount_cents), unit: currency_symbol(Current.family.currency), precision: 0) %>
+      </span>
+    </div>
+  </div>
+<% else %>
+  <div class="bg-container rounded-xl p-8 text-center shadow-border-xs">
+    <%= icon("split", class: "w-12 h-12 text-secondary mx-auto mb-4") %>
+    <h3 class="text-lg font-semibold text-primary mb-2">Sin gastos compartidos</h3>
+    <p class="text-secondary mb-4">Registra los gastos compartidos adicionales que no están en los items fijos.</p>
+    <%= render DS::Link.new(
+      text: "Agregar Gasto Compartido",
+      href: new_household_shared_expense_path(period: period_param),
+      variant: "primary"
+    ) %>
+  </div>
+<% end %>
+

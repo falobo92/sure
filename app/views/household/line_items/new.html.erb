@@ -1,0 +1,18 @@
+<% content_for :page_header do %>
+  <div class="mb-4">
+    <h1 class="text-2xl font-bold text-primary">Nuevo Item</h1>
+    <p class="text-secondary">Agrega un ingreso o gasto fijo para <%= period_name %></p>
+  </div>
+<% end %>
+
+<div class="mb-4">
+  <%= link_to household_line_items_path(period: period_param), class: "text-sm text-secondary hover:text-primary transition-colors flex items-center gap-1" do %>
+    <%= icon("arrow-left", class: "w-4 h-4") %>
+    Volver a Items
+  <% end %>
+</div>
+
+<div class="bg-container rounded-xl p-6 shadow-border-xs max-w-2xl">
+  <%= render "form", line_item: @line_item %>
+</div>
+

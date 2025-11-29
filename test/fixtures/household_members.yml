@@ -1,0 +1,20 @@
+# Household Members fixtures
+
+felipe:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  name: Felipe
+  code: FL
+  position: 1
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+romina:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  name: Romina
+  code: RP
+  position: 2
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+

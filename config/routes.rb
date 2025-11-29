@@ -332,6 +332,16 @@ Rails.application.routes.draw do
     post "stripe"
   end
 
+  # Household Finance module
+  namespace :household do
+    get "/", to: "dashboard#show", as: :dashboard
+    resources :members, except: :show
+    resources :line_items, except: :show do
+      post :copy_from_previous, on: :collection
+    end
+    resources :shared_expenses, except: :show
+  end
+
   get "redis-configuration-error", to: "pages#redis_configuration_error"
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -1,0 +1,26 @@
+<%# locals: (title:, amount:, currency:, variant: :neutral, icon_name: nil) %>
+<%
+  variant_classes = {
+    positive: "bg-green-50 border-green-200 theme-dark:bg-green-900/20 theme-dark:border-green-800",
+    negative: "bg-red-50 border-red-200 theme-dark:bg-red-900/20 theme-dark:border-red-800",
+    neutral: "bg-container border-secondary"
+  }
+  amount_classes = {
+    positive: "text-green-600 theme-dark:text-green-400",
+    negative: "text-red-600 theme-dark:text-red-400",
+    neutral: "text-primary"
+  }
+%>
+
+<div class="p-4 rounded-xl border <%= variant_classes[variant] %>">
+  <div class="flex items-center gap-2 mb-2">
+    <% if icon_name %>
+      <%= icon(icon_name, class: "w-4 h-4 text-secondary") %>
+    <% end %>
+    <span class="text-sm text-secondary"><%= title %></span>
+  </div>
+  <p class="text-2xl font-semibold <%= amount_classes[variant] %>">
+    <%= number_to_currency(amount, unit: currency_symbol(currency), precision: 0) %>
+  </p>
+</div>
+

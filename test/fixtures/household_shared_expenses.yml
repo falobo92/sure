@@ -1,0 +1,41 @@
+# Household Shared Expenses fixtures
+
+supermercado_felipe:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: felipe
+  description: Supermercado
+  amount_cents: 150000
+  currency: CLP
+  expense_date: <%= Date.current - 5.days %>
+  period_date: <%= Date.current.beginning_of_month %>
+  shared: true
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+gasolina_felipe:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: felipe
+  description: Gasolina
+  amount_cents: 80000
+  currency: CLP
+  expense_date: <%= Date.current - 10.days %>
+  period_date: <%= Date.current.beginning_of_month %>
+  shared: true
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+
+supermercado_romina:
+  id: <%= SecureRandom.uuid %>
+  family: dylan_family
+  household_member: romina
+  description: Supermercado
+  amount_cents: 120000
+  currency: CLP
+  expense_date: <%= Date.current - 3.days %>
+  period_date: <%= Date.current.beginning_of_month %>
+  shared: true
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
+

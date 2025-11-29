@@ -1,0 +1,36 @@
+<%# locals: (member:) %>
+<%= form_with model: member, url: member.persisted? ? household_member_path(member) : household_members_path, class: "space-y-4" do |f| %>
+  <% if member.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 theme-dark:bg-red-900/20 theme-dark:border-red-800">
+      <p class="font-medium text-red-700 theme-dark:text-red-300">Por favor corrige los siguientes errores:</p>
+      <ul class="list-disc list-inside text-sm text-red-600 theme-dark:text-red-400 mt-2">
+        <% member.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-field">
+    <%= f.label :name, "Nombre", class: "form-field__label" %>
+    <%= f.text_field :name, class: "form-field__input", placeholder: "Ej: Felipe", required: true %>
+  </div>
+
+  <div class="form-field">
+    <%= f.label :code, "Código", class: "form-field__label" %>
+    <%= f.text_field :code, class: "form-field__input", placeholder: "Ej: FL", maxlength: 10, required: true %>
+    <p class="text-xs text-secondary mt-1">Código corto de máximo 10 caracteres (ej: FL, RP)</p>
+  </div>
+
+  <div class="form-field">
+    <%= f.label :position, "Posición", class: "form-field__label" %>
+    <%= f.number_field :position, class: "form-field__input", min: 1 %>
+    <p class="text-xs text-secondary mt-1">Determina el orden y ciclo de pago (1 = Ciclo 1, 2 = Ciclo 2)</p>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-4">
+    <%= link_to "Cancelar", household_members_path, class: "text-sm text-secondary hover:text-primary transition-colors" %>
+    <%= f.submit member.persisted? ? "Actualizar" : "Crear Miembro", class: "px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer" %>
+  </div>
+<% end %>
+

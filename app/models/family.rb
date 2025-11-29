@@ -37,6 +37,11 @@ class Family < ApplicationRecord
   has_many :llm_usages, dependent: :destroy
   has_many :recurring_transactions, dependent: :destroy
 
+  # Household Finance module associations
+  has_many :household_members, class_name: "Household::Member", dependent: :destroy
+  has_many :household_line_items, class_name: "Household::LineItem", dependent: :destroy
+  has_many :household_shared_expenses, class_name: "Household::SharedExpense", dependent: :destroy
+
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :date_format, inclusion: { in: DATE_FORMATS.map(&:last) }
 
